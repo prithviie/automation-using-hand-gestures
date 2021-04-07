@@ -3,6 +3,7 @@ import tflearn
 from tflearn.layers.conv import conv_2d,max_pool_2d
 from tflearn.layers.core import input_data,dropout,fully_connected
 from tflearn.layers.estimator import regression
+from tensorflow.python.framework import ops
 import numpy as np
 from PIL import Image
 import cv2
@@ -158,7 +159,7 @@ def showStatistics(predictedClass, confidence):
     1,
     (255, 255, 255),
     2)
-    
+
     cv2.putText(textImage,"Confidence : " + str(confidence * 100) + '%', 
     (30, 100), 
     cv2.FONT_HERSHEY_SIMPLEX, 
@@ -171,7 +172,7 @@ def showStatistics(predictedClass, confidence):
 
 
 # Model defined
-tf.reset_default_graph()
+ops.reset_default_graph()
 convnet=input_data(shape=[None,89,100,1],name='input')
 convnet=conv_2d(convnet,32,2,activation='relu')
 convnet=max_pool_2d(convnet,2)

@@ -1,5 +1,7 @@
 from PIL import Image
 
+current_gesture_directory = './TestDataset/Fist_images/fist_image_'
+
 def resizeImage(imageName):
     basewidth = 100
     img = Image.open(imageName)
@@ -10,6 +12,6 @@ def resizeImage(imageName):
 
 for i in range(0, 101):
     # Mention the directory in which you wanna resize the images followed by the image name
-    resizeImage("Dataset/FistTest/fist_" + str(i) + '.png')
+    resizeImage(current_gesture_directory + str(i) + '.png')
 
 

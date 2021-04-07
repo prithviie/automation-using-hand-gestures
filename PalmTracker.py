@@ -5,7 +5,7 @@ import numpy as np
 
 # global variables
 bg = None
-
+current_gesture_directory = './TestDataset/Fist_images/fist_image_'
 
 def run_avg(image, aWeight):
     global bg
@@ -105,7 +105,7 @@ def main():
                     if start_recording:
 
                         # Mention the directory in which you wanna store the images followed by the image name
-                        cv2.imwrite("Dataset/FistTest/fist_" +
+                        cv2.imwrite(current_gesture_directory +
                                     str(image_num) + '.png', thresholded)
                         image_num += 1
                     cv2.imshow("Thesholded", thresholded)
@@ -130,7 +130,7 @@ def main():
                 start_recording = True
 
         else:
-            print("[Warning!] Error input, Please check your(camra Or video)")
+            print("[Warning!] Error input, Please check your camera or video")
             break
 
 
