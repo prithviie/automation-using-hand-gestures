@@ -1,4 +1,4 @@
 Dataset/
 TestDataset/
-tweaks/
+preprocessing/*.txt
 .ipynb_checkpoints/

@@ -6,6 +6,7 @@ import numpy as np
 # global variables
 bg = None
 current_gesture_directory = './TestDataset/Fist_images/fist_image_'
+num_of_images = 1000
 
 def run_avg(image, aWeight):
     global bg
@@ -123,7 +124,7 @@ def main():
             keypress = cv2.waitKey(1) & 0xFF
 
             # if the user pressed "q", then stop looping
-            if keypress == ord("q") or image_num > 100:
+            if keypress == ord("q") or image_num > num_of_images:
                 break
 
             if keypress == ord("s"):
