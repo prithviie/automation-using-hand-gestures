@@ -1,4 +1,4 @@
 Dataset/
-TestDataset/
-preprocessing/*.txt
+Dataset_from_github/
+misc/
 .ipynb_checkpoints/

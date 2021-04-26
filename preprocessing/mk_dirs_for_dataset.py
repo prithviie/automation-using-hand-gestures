@@ -1,17 +1,20 @@
 import os
 
 dirs = []
-dataset_dir = 'TestDataset'
+dataset_dir = 'UnprocessedDataset'
 gestures_file = 'gestures.txt'
 all_dataset_dirs_file = 'all_dataset_dirs.txt'
 
+if not os.path.isdir(dataset_dir):
+    os.mkdir(dataset_dir)
+    
 
 with open(f'./{os.path.dirname(__file__)}/{gestures_file}', 'r') as f:
     for line in f:
         line = line.strip()
 
-        imagesf = f'./{dataset_dir}/{line}_images'
-        testf = f'./{dataset_dir}/{line}_test_images'
+        imagesf = f'{dataset_dir}/{line}_train_images'
+        testf = f'{dataset_dir}/{line}_test_images'
 
         if not os.path.isdir(imagesf):
             os.mkdir(imagesf)

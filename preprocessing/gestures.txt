@@ -1,0 +1,11 @@
+Fist
+One
+Two
+Three
+Four
+Five-palm
+OK
+Thumbs_up
+Thumbs_down
+Stop
+Direction_left

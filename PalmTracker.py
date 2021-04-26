@@ -3,10 +3,17 @@ import cv2
 import imutils
 import numpy as np
 
-# global variables
 bg = None
-current_gesture_directory = './TestDataset/Fist_images/fist_image_'
-num_of_images = 1000
+dataset_dir = 'UnprocessedDataset'
+
+gesture = input('Enter gesture name as per the name in preprocessing/gestures.txt: ')
+mode = input('train or test? ').lower()
+num_of_images = int(input('Number of images: '))
+
+current_gesture_directory = f'{dataset_dir}/{gesture}_{mode}_images/{gesture.lower()}_{mode}_image_'
+current_gesture = current_gesture_directory.index('/', 12)
+current_gesture = current_gesture_directory[current_gesture+1:-1]
+
 
 def run_avg(image, aWeight):
     global bg
@@ -106,10 +113,10 @@ def main():
                     if start_recording:
 
                         # Mention the directory in which you wanna store the images followed by the image name
-                        cv2.imwrite(current_gesture_directory +
-                                    str(image_num) + '.png', thresholded)
+                        # cv2.imwrite(current_gesture_directory + str(image_num) + '.png', thresholded)
+                        cv2.imwrite(f"{current_gesture_directory}{image_num}.png", thresholded)
                         image_num += 1
-                    cv2.imshow("Thesholded", thresholded)
+                    cv2.imshow("Thresholded", thresholded)
 
             # draw the segmented hand
             cv2.rectangle(clone, (left, top), (right, bottom), (0, 255, 0), 2)
@@ -118,13 +125,13 @@ def main():
             num_frames += 1
 
             # display the frame with segmented hand
-            cv2.imshow("Video Feed", clone)
+            cv2.imshow(f"Recording for {current_gesture}", clone)
 
             # observe the keypress by the user
             keypress = cv2.waitKey(1) & 0xFF
 
             # if the user pressed "q", then stop looping
-            if keypress == ord("q") or image_num > num_of_images:
+            if keypress == ord("q") or image_num >= num_of_images:
                 break
 
             if keypress == ord("s"):
