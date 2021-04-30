@@ -1,7 +1,9 @@
 import os
 
+# CREATES 2 (TEST AND TRAIN) SUB-DIRECTORIES INTO THE DATASET DIRECTORY FOR EACH GESTURE
+
 dirs = []
-dataset_dir = 'UnprocessedDataset'
+dataset_dir = 'Dataset'
 gestures_file = 'gestures.txt'
 all_dataset_dirs_file = 'all_dataset_dirs.txt'
 
@@ -24,6 +26,7 @@ with open(f'./{os.path.dirname(__file__)}/{gestures_file}', 'r') as f:
         dirs.append(testf)
 
 
+# WRITE THE CREATED SUB-DIRECTORIES INTO TEXT FILE
 count = 0
 with open(f'./{os.path.dirname(__file__)}/{all_dataset_dirs_file}', 'w+') as f:
     for d in dirs:

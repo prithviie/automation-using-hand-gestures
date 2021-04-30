@@ -1,18 +1,41 @@
-# organize imports
+import os
 import cv2
 import imutils
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
 
 bg = None
-dataset_dir = 'UnprocessedDataset'
+dataset_dir = 'Dataset'
+gestures_file = 'preprocessing/gestures.txt'
 
-gesture = input('Enter gesture name as per the name in preprocessing/gestures.txt: ')
+gesture = input('Enter gesture name as per the name in preprocessing/gestures.txt (case sensitive): ')
 mode = input('train or test? ').lower()
 num_of_images = int(input('Number of images: '))
 
 current_gesture_directory = f'{dataset_dir}/{gesture}_{mode}_images/{gesture.lower()}_{mode}_image_'
 current_gesture = current_gesture_directory.index('/', 12)
 current_gesture = current_gesture_directory[current_gesture+1:-1]
+
+def get_labels():
+
+    gestures = []
+    with open(gestures_file, 'r') as f:
+        for line in f:
+            line = line.strip()
+            gestures.append(line)
+
+    gestures.sort()
+    gestures = np.array([gestures[i] for i in range(len(gestures))])
+    integer_encoded = LabelEncoder().fit_transform(gestures)
+
+    labels = {}
+    for i in range(len(gestures)):
+        labels[gestures[i]] = integer_encoded[i]
+
+    # print(labels)
+
+    return labels
 
 
 def run_avg(image, aWeight):
@@ -52,6 +75,14 @@ def segment(image, threshold=25):
 
 
 def main():
+    # initialize labels dictionary
+    try:
+        labels = get_labels()
+        label_id = labels[gesture]
+    except Exception as e:
+        print('Make sure you pass in the correct parameters.')
+        quit()
+
     # initialize weight for running average
     aWeight = 0.5
 
@@ -114,7 +145,7 @@ def main():
 
                         # Mention the directory in which you wanna store the images followed by the image name
                         # cv2.imwrite(current_gesture_directory + str(image_num) + '.png', thresholded)
-                        cv2.imwrite(f"{current_gesture_directory}{image_num}.png", thresholded)
+                        cv2.imwrite(f"{current_gesture_directory}{image_num}__l={label_id}.png", thresholded)
                         image_num += 1
                     cv2.imshow("Thresholded", thresholded)
 
@@ -124,6 +155,9 @@ def main():
             # increment the number of frames
             num_frames += 1
 
+            # showing number of images captured
+            cv2.putText(clone, f"Captured {image_num} images", (15, 30), cv2.FONT_HERSHEY_COMPLEX, 1, (0,0,255), 1)
+
             # display the frame with segmented hand
             cv2.imshow(f"Recording for {current_gesture}", clone)
 
@@ -132,6 +166,9 @@ def main():
 
             # if the user pressed "q", then stop looping
             if keypress == ord("q") or image_num >= num_of_images:
+                # free up memory
+                camera.release()
+                cv2.destroyAllWindows()
                 break
 
             if keypress == ord("s"):
@@ -143,7 +180,3 @@ def main():
 
 
 main()
-
-# free up memory
-camera.release()
-cv2.destroyAllWindows()
