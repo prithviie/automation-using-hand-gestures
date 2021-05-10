@@ -9,3 +9,4 @@ Thumbs_up
 Thumbs_down
 Stop
 Direction_left
+Direction_right

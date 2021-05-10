@@ -1,6 +1,6 @@
 import os
 
-# CREATES 2 (TEST AND TRAIN) SUB-DIRECTORIES INTO THE DATASET DIRECTORY FOR EACH GESTURE
+# CREATES SUB-DIRECTORIES INTO THE DATASET DIRECTORY FOR EACH GESTURE
 
 dirs = []
 dataset_dir = 'Dataset'
@@ -15,23 +15,16 @@ with open(f'./{os.path.dirname(__file__)}/{gestures_file}', 'r') as f:
     for line in f:
         line = line.strip()
 
-        imagesf = f'{dataset_dir}/{line}_train_images'
-        testf = f'{dataset_dir}/{line}_test_images'
+        imagesf = f'{dataset_dir}/{line}'
 
         if not os.path.isdir(imagesf):
             os.mkdir(imagesf)
-            os.mkdir(testf)
 
         dirs.append(imagesf)
-        dirs.append(testf)
 
 
 # WRITE THE CREATED SUB-DIRECTORIES INTO TEXT FILE
 count = 0
 with open(f'./{os.path.dirname(__file__)}/{all_dataset_dirs_file}', 'w+') as f:
     for d in dirs:
-        f.write(f"'{d}/{os.path.basename(d).lower()[:-1]}_'\n")
-        count += 1
-        if count >= 2:
-            count = 0
-            f.write('\n')
+        f.write(f"{d}\n")

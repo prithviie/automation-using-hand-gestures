@@ -1,5 +1,4 @@
-Dataset_/
 Dataset/
 misc/
-preprocessing/all_dataset_dirs.txt
+ModelTrainer.py
 .ipynb_checkpoints/

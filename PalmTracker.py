@@ -2,20 +2,19 @@ import os
 import cv2
 import imutils
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 
 bg = None
 dataset_dir = 'Dataset'
 gestures_file = 'preprocessing/gestures.txt'
 
-gesture = input('Enter gesture name as per the name in preprocessing/gestures.txt (case sensitive): ')
-mode = input('train or test? ').lower()
+gesture = input(
+    'Enter gesture name as per the name in preprocessing/gestures.txt (case sensitive): ')
 num_of_images = int(input('Number of images: '))
+continue_image_no_from = int(
+    input('Enter image no from where you want to continue (if new enter 0): '))
+current_image_name = f'{dataset_dir}/{gesture}/{gesture.lower()}_image_'
 
-current_gesture_directory = f'{dataset_dir}/{gesture}_{mode}_images/{gesture.lower()}_{mode}_image_'
-current_gesture = current_gesture_directory.index('/', 12)
-current_gesture = current_gesture_directory[current_gesture+1:-1]
 
 def get_labels():
 
@@ -94,7 +93,7 @@ def main():
 
     # initialize num of frames
     num_frames = 0
-    image_num = 0
+    image_num = continue_image_no_from
 
     start_recording = False
 
@@ -144,8 +143,9 @@ def main():
                     if start_recording:
 
                         # Mention the directory in which you wanna store the images followed by the image name
-                        # cv2.imwrite(current_gesture_directory + str(image_num) + '.png', thresholded)
-                        cv2.imwrite(f"{current_gesture_directory}{image_num}__l={label_id}.png", thresholded)
+                        # cv2.imwrite(current_image_name + str(image_num) + '.png', thresholded)
+                        cv2.imwrite(
+                            f"{current_image_name}{image_num}_l={label_id}.png", thresholded)
                         image_num += 1
                     cv2.imshow("Thresholded", thresholded)
 
@@ -156,16 +156,17 @@ def main():
             num_frames += 1
 
             # showing number of images captured
-            cv2.putText(clone, f"Captured {image_num} images", (15, 30), cv2.FONT_HERSHEY_COMPLEX, 1, (0,0,255), 1)
+            cv2.putText(clone, f"Captured {image_num} images",
+                        (15, 500), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
 
             # display the frame with segmented hand
-            cv2.imshow(f"Recording for {current_gesture}", clone)
+            cv2.imshow(f"Capturing for {gesture}", clone)
 
             # observe the keypress by the user
             keypress = cv2.waitKey(1) & 0xFF
 
             # if the user pressed "q", then stop looping
-            if keypress == ord("q") or image_num >= num_of_images:
+            if keypress == ord("q") or image_num >= (num_of_images + continue_image_no_from):
                 # free up memory
                 camera.release()
                 cv2.destroyAllWindows()
