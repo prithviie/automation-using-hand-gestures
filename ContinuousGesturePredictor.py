@@ -8,9 +8,16 @@ import numpy as np
 from PIL import Image
 import cv2
 import imutils
+import os
+from sklearn.preprocessing import LabelEncoder
+from PalmTracker import *
 
-# global variables
-bg = None
+checkpoint_path = 'TrainedModel/checkpoints/' + 'Gesture12RecognitionModel.tflearn'
+best_checkpoint_path = 'TrainedModel/checkpoints/' + 'Gesture12RecognitionModelBest.tflearn'
+saved_model_path = 'TrainedModel/' + 'Gesture12RecognitionModel.tflearn'
+
+n_classes = len(os.listdir(dataset_dir))
+
 
 def resizeImage(imageName):
     basewidth = 100
@@ -20,39 +27,62 @@ def resizeImage(imageName):
     img = img.resize((basewidth,hsize), Image.ANTIALIAS)
     img.save(imageName)
 
-def run_avg(image, aWeight):
-    global bg
-    # initialize the background
-    if bg is None:
-        bg = image.copy().astype("float")
-        return
 
-    # compute weighted average, accumulate it and update the background
-    cv2.accumulateWeighted(image, bg, aWeight)
+def getPredictedClass():
+    # Predict
+    image = cv2.imread('Temp.png')
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    prediction = model.predict([gray_image.reshape(89, 100, 1)])
 
-def segment(image, threshold=25):
-    global bg
-    # find the absolute difference between background and current frame
-    diff = cv2.absdiff(bg.astype("uint8"), image)
+    sum = 0
+    for i in range(n_classes):
+        sum += prediction[0][i]
 
-    # threshold the diff image so that we get the foreground
-    thresholded = cv2.threshold(diff,
-                                threshold,
-                                255,
-                                cv2.THRESH_BINARY)[1]
+    return np.argmax(prediction), (np.amax(prediction)/sum)
 
-    # get the contours in the thresholded image
-    (cnts, _) = cv2.findContours(thresholded.copy(),
-                                    cv2.RETR_EXTERNAL,
-                                    cv2.CHAIN_APPROX_SIMPLE)
 
-    # return None, if no contours detected
-    if len(cnts) == 0:
-        return
-    else:
-        # based on contour area, get the maximum contour which is the hand
-        segmented = max(cnts, key=cv2.contourArea)
-        return (thresholded, segmented)
+def get_labels_rev():
+
+    gestures = []
+    with open(gestures_file, 'r') as f:
+        for line in f:
+            line = line.strip()
+            gestures.append(line)
+
+    gestures.sort()
+    gestures = np.array([gestures[i] for i in range(len(gestures))])
+    integer_encoded = LabelEncoder().fit_transform(gestures)
+
+    labels = {}
+    for i in range(len(gestures)):
+        labels[integer_encoded[i]] = gestures[i]
+
+    # print(labels)
+
+    return labels
+
+
+labels = get_labels_rev()
+def showStatistics(predictedClass, confidence):
+
+    textImage = np.zeros((300,512,3), np.uint8)
+    className = labels[predictedClass]
+
+    cv2.putText(textImage,"Pedicted Class : " + className, 
+    (30, 30), 
+    cv2.FONT_HERSHEY_SIMPLEX, 
+    1,
+    (255, 255, 255),
+    2)
+
+    cv2.putText(textImage,"Confidence : " + str(confidence * 100) + '%', 
+    (30, 100), 
+    cv2.FONT_HERSHEY_SIMPLEX, 
+    1,
+    (255, 255, 255),
+    2)
+    cv2.imshow("Statistics", textImage)
+
 
 def main():
     # initialize weight for running average
@@ -113,7 +143,7 @@ def main():
                     resizeImage('Temp.png')
                     predictedClass, confidence = getPredictedClass()
                     showStatistics(predictedClass, confidence)
-                cv2.imshow("Thesholded", thresholded)
+                cv2.imshow("Thresholded", thresholded)
 
         # draw the segmented hand
         cv2.rectangle(clone, (left, top), (right, bottom), (0,255,0), 2)
@@ -134,76 +164,50 @@ def main():
         if keypress == ord("s"):
             start_recording = True
 
-def getPredictedClass():
-    # Predict
-    image = cv2.imread('Temp.png')
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    prediction = model.predict([gray_image.reshape(89, 100, 1)])
-    return np.argmax(prediction), (np.amax(prediction) / (prediction[0][0] + prediction[0][1] + prediction[0][2]))
-
-def showStatistics(predictedClass, confidence):
-
-    textImage = np.zeros((300,512,3), np.uint8)
-    className = ""
-
-    if predictedClass == 0:
-        className = "Swing"
-    elif predictedClass == 1:
-        className = "Palm"
-    elif predictedClass == 2:
-        className = "Fist"
-
-    cv2.putText(textImage,"Pedicted Class : " + className, 
-    (30, 30), 
-    cv2.FONT_HERSHEY_SIMPLEX, 
-    1,
-    (255, 255, 255),
-    2)
-
-    cv2.putText(textImage,"Confidence : " + str(confidence * 100) + '%', 
-    (30, 100), 
-    cv2.FONT_HERSHEY_SIMPLEX, 
-    1,
-    (255, 255, 255),
-    2)
-    cv2.imshow("Statistics", textImage)
-
-
 
 
 # Model defined
 ops.reset_default_graph()
-convnet=input_data(shape=[None,89,100,1],name='input')
-convnet=conv_2d(convnet,32,2,activation='relu')
-convnet=max_pool_2d(convnet,2)
-convnet=conv_2d(convnet,64,2,activation='relu')
-convnet=max_pool_2d(convnet,2)
+#                           [batch, height, width, in_channels]
+convnet = input_data(shape=[None, 89, 100, 1], name='input')
 
-convnet=conv_2d(convnet,128,2,activation='relu')
-convnet=max_pool_2d(convnet,2)
+convnet = conv_2d(convnet, nb_filter=32, filter_size=2, activation='relu')
+convnet = max_pool_2d(convnet,  kernel_size=2)
 
-convnet=conv_2d(convnet,256,2,activation='relu')
-convnet=max_pool_2d(convnet,2)
+convnet = conv_2d(convnet, 64, 2, activation='relu')
+convnet = max_pool_2d(convnet, 2)
 
-convnet=conv_2d(convnet,256,2,activation='relu')
-convnet=max_pool_2d(convnet,2)
+convnet = conv_2d(convnet, 128, 2, activation='relu')
+convnet = max_pool_2d(convnet, 2)
 
-convnet=conv_2d(convnet,128,2,activation='relu')
-convnet=max_pool_2d(convnet,2)
+convnet = conv_2d(convnet, 256, 2, activation='relu')
+convnet = max_pool_2d(convnet, 2)
 
-convnet=conv_2d(convnet,64,2,activation='relu')
-convnet=max_pool_2d(convnet,2)
+convnet = conv_2d(convnet, 256, 2, activation='relu')
+convnet = max_pool_2d(convnet, 2)
 
-convnet=fully_connected(convnet,1000,activation='relu')
-convnet=dropout(convnet,0.75)
+convnet = conv_2d(convnet, 128, 2, activation='relu')
+convnet = max_pool_2d(convnet, 2)
 
-convnet=fully_connected(convnet,3,activation='softmax')
+convnet = conv_2d(convnet, 64, 2, activation='relu')
+convnet = max_pool_2d(convnet, 2)
 
-convnet=regression(convnet,optimizer='adam',learning_rate=0.001,loss='categorical_crossentropy',name='regression')
+convnet = fully_connected(convnet, n_units=1000, activation='relu')
+convnet = dropout(convnet, keep_prob=0.75)
 
-model=tflearn.DNN(convnet,tensorboard_verbose=0)
+convnet = fully_connected(convnet, n_units=n_classes, activation='softmax')
+
+convnet = regression(convnet,
+                     optimizer='adam',
+                     learning_rate=0.001,
+                     loss='categorical_crossentropy',
+                     name='regression')
+
+model = tflearn.DNN(convnet, 
+                    checkpoint_path=checkpoint_path, 
+                    best_checkpoint_path=best_checkpoint_path)
 
 # Load Saved Model
-model.load("TrainedModel/GestureRecogModel.tfl")
+model.load(saved_model_path)
 
 main()
