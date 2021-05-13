@@ -13,7 +13,7 @@ gesture = input(
 num_of_images = int(input('Number of images: '))
 continue_image_no_from = int(
     input('Enter image no from where you want to continue (if new enter 0): '))
-current_image_name = f'{dataset_dir}/{gesture}/{gesture.lower()}_image_'
+current_gesture_dir = f'{dataset_dir}/{gesture}'
 
 
 def get_labels():
@@ -143,9 +143,9 @@ def main():
                     if start_recording:
 
                         # Mention the directory in which you wanna store the images followed by the image name
-                        # cv2.imwrite(current_image_name + str(image_num) + '.png', thresholded)
+                        # cv2.imwrite(current_gesture_dir + str(image_num) + '.png', thresholded)
                         cv2.imwrite(
-                            f"{current_image_name}{image_num}_l={label_id}.png", thresholded)
+                            f"{current_gesture_dir}/{image_num}_l={label_id}.png", thresholded)
                         image_num += 1
                     cv2.imshow("Thresholded", thresholded)
 
