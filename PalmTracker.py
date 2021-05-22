@@ -8,13 +8,6 @@ bg = None
 dataset_dir = 'Dataset'
 gestures_file = 'preprocessing/gestures.txt'
 
-gesture = input(
-    'Enter gesture name as per the name in preprocessing/gestures.txt (case sensitive): ')
-num_of_images = int(input('Number of images: '))
-continue_image_no_from = int(
-    input('Enter image no from where you want to continue (if new enter 0): '))
-current_gesture_dir = f'{dataset_dir}/{gesture}'
-
 
 def get_labels():
 
@@ -75,6 +68,14 @@ def segment(image, threshold=25):
 
 def main():
     # initialize labels dictionary
+
+    gesture = input(
+    'Enter gesture name as per the name in preprocessing/gestures.txt (case sensitive): ')
+    num_of_images = int(input('Number of images: '))
+    continue_image_no_from = int(
+        input('Enter image no from where you want to continue (if new enter 0): '))
+    current_gesture_dir = f'{dataset_dir}/{gesture}'
+
     try:
         labels = get_labels()
         label_id = labels[gesture]

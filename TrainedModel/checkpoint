@@ -1,0 +1,2 @@
+model_checkpoint_path: "/media/prithvi/3F0CC364D83B1E93/prithvi/code/projects/hand-gesture/TrainedModel/Gesture12RecognitionModel.tflearn"
+all_model_checkpoint_paths: "/media/prithvi/3F0CC364D83B1E93/prithvi/code/projects/hand-gesture/TrainedModel/Gesture12RecognitionModel.tflearn"
