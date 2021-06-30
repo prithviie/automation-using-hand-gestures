@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tflearn
-from tflearn.layers.conv import conv_2d,max_pool_2d
-from tflearn.layers.core import input_data,dropout,fully_connected
+from tflearn.layers.conv import conv_2d, max_pool_2d
+from tflearn.layers.core import input_data, dropout, fully_connected
 from tflearn.layers.estimator import regression
 from tensorflow.python.framework import ops
 import numpy as np
@@ -12,8 +12,31 @@ import os
 from sklearn.preprocessing import LabelEncoder
 from PalmTracker import *
 
-checkpoint_path = 'TrainedModel/checkpoints/' + 'Gesture12RecognitionModel.tflearn'
-best_checkpoint_path = 'TrainedModel/checkpoints/' + 'Gesture12RecognitionModelBest.tflearn'
+
+# PUBNUB
+from pubnub.callbacks import SubscribeCallback
+from pubnub.enums import PNStatusCategory
+from pubnub.pnconfiguration import PNConfiguration
+from pubnub.pubnub import PubNub
+
+ENTRY = "GestureControl"
+CHANNEL = "Detect"
+KILL_CONNECTION = "exit"
+the_update = None
+
+pnconfig = PNConfiguration()
+pnconfig.publish_key = 'your publisher key'
+pnconfig.subscribe_key = 'your subscriber key'
+pnconfig.uuid = "serverUUID-PUB"
+
+pubnub = PubNub(pnconfig)
+# PUBNUB
+
+
+checkpoint_path = 'TrainedModel/checkpoints/' + \
+    'Gesture12RecognitionModel.tflearn'
+best_checkpoint_path = 'TrainedModel/checkpoints/' + \
+    'Gesture12RecognitionModelBest.tflearn'
 saved_model_path = 'TrainedModel/' + 'Gesture12RecognitionModel.tflearn'
 
 n_classes = len(os.listdir(dataset_dir))
@@ -24,7 +47,7 @@ def resizeImage(imageName):
     img = Image.open(imageName)
     wpercent = (basewidth/float(img.size[0]))
     hsize = int((float(img.size[1])*float(wpercent)))
-    img = img.resize((basewidth,hsize), Image.ANTIALIAS)
+    img = img.resize((basewidth, hsize), Image.ANTIALIAS)
     img.save(imageName)
 
 
@@ -63,24 +86,52 @@ def get_labels_rev():
 
 
 labels = get_labels_rev()
+func_map = {
+    '11': 'Red ON',            # thumbs up
+    '10': 'Red half ON',       # thumbs down
+    '3': 'Red OFF',            # fist
+
+    '12': 'Green ON',          # two
+    '9': 'Green half ON',      # three
+    '5': 'Green OFF',          # four
+
+    '6': 'Get rain-value',        # ok
+
+    '7': 'Fan ON',             # one
+    '8': 'Fan OFF',            # stop
+
+    '2': 'TV channel change',     # right
+
+    '4': 'Clean floor'         # palm-five
+}
+
+
 def showStatistics(predictedClass, confidence):
 
-    textImage = np.zeros((300,512,3), np.uint8)
+    textImage = np.zeros((250, 512, 3), np.uint8)
     className = labels[predictedClass]
 
-    cv2.putText(textImage,"Pedicted Class : " + className, 
-    (30, 30), 
-    cv2.FONT_HERSHEY_SIMPLEX, 
-    1,
-    (255, 255, 255),
-    2)
+    cv2.putText(textImage, "Predicted class: " + className,
+                (5, 30),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255, 255, 255),
+                1)
 
-    cv2.putText(textImage,"Confidence : " + str(confidence * 100) + '%', 
-    (30, 100), 
-    cv2.FONT_HERSHEY_SIMPLEX, 
-    1,
-    (255, 255, 255),
-    2)
+    cv2.putText(textImage, "Confidence: " + str(confidence * 100) + '%',
+                (5, 100),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255, 255, 255),
+                1)
+
+    cv2.putText(textImage, "Actuate: " + func_map[str(predictedClass+1)],
+                (5, 170),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (0, 255, 0),
+                1)
+
     cv2.imshow("Statistics", textImage)
 
 
@@ -104,7 +155,7 @@ def main():
         (grabbed, frame) = camera.read()
 
         # resize the frame
-        frame = imutils.resize(frame, width = 700)
+        frame = imutils.resize(frame, width=700)
 
         # flip the frame so that it is not the mirror view
         frame = cv2.flip(frame, 1)
@@ -126,6 +177,8 @@ def main():
         # so that our running average model gets calibrated
         if num_frames < 30:
             run_avg(gray, aWeight)
+            print(num_frames)
+
         else:
             # segment the hand region
             hand = segment(gray)
@@ -137,16 +190,33 @@ def main():
                 (thresholded, segmented) = hand
 
                 # draw the segmented region and display the frame
-                cv2.drawContours(clone, [segmented + (right, top)], -1, (0, 0, 255))
+                cv2.drawContours(
+                    clone, [segmented + (right, top)], -1, (0, 0, 255))
                 if start_recording:
                     cv2.imwrite('Temp.png', thresholded)
                     resizeImage('Temp.png')
                     predictedClass, confidence = getPredictedClass()
                     showStatistics(predictedClass, confidence)
+
+                    # PUBNUB integration
+
+                    the_update = str(int(predictedClass)+1)
+                    the_message = {"entry": ENTRY, "update": the_update}
+                    envelope = pubnub.publish().channel(CHANNEL).message(the_message).sync()
+
+                    if envelope.status.is_error():
+                        print("[PUBLISH: fail]")
+                        print("error: {}".format(status.error))
+                    else:
+                        print("[PUBLISH: sent]")
+                        print(f"Sent: {the_update}")
+
+                    # PUBNUB integration
+
                 cv2.imshow("Thresholded", thresholded)
 
         # draw the segmented hand
-        cv2.rectangle(clone, (left, top), (right, bottom), (0,255,0), 2)
+        cv2.rectangle(clone, (left, top), (right, bottom), (0, 255, 0), 2)
 
         # increment the number of frames
         num_frames += 1
@@ -159,11 +229,11 @@ def main():
 
         # if the user pressed "q", then stop looping
         if keypress == ord("q"):
+            the_update = KILL_CONNECTION
             break
-        
+
         if keypress == ord("s"):
             start_recording = True
-
 
 
 # Model defined
@@ -203,8 +273,8 @@ convnet = regression(convnet,
                      loss='categorical_crossentropy',
                      name='regression')
 
-model = tflearn.DNN(convnet, 
-                    checkpoint_path=checkpoint_path, 
+model = tflearn.DNN(convnet,
+                    checkpoint_path=checkpoint_path,
                     best_checkpoint_path=best_checkpoint_path)
 
 # Load Saved Model
