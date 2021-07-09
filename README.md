@@ -57,5 +57,5 @@
 
   - resizes all images from all gesture sub-directories to appropriate size (89x100).
 
-          :octocat: Here is our final implementation 
+:octocat: Here is our final implementation 
 ![](DIPFinalImplementation.gif)
