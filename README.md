@@ -56,3 +56,6 @@
 - run [preprocessing/create_final_dataset.py](preprocessing/create_final_dataset.py) => run after creating the entire dataset.
 
   - resizes all images from all gesture sub-directories to appropriate size (89x100).
+
+          :octocat: Here is our final implementation 
+![](DIPFinalImplementation.gif)
