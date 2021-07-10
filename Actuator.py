@@ -7,8 +7,8 @@ import os
 import threading
 import turtle
 import random
-# import pyfirmata
-
+# import pyfirmata # for hardware (arduino)
+# SUBSCRIBER SIDE
 
 # turtle
 win_x = 600
@@ -55,6 +55,7 @@ pnconfig.uuid = "serverUUID-SUB"
 pubnub = PubNub(pnconfig)
 
 
+# HARDWARE
 # arduino
 # board = pyfirmata.Arduino("COM4")  # for arduino board
 
@@ -70,6 +71,7 @@ pubnub = PubNub(pnconfig)
 
 
 def draw_border(l, b):
+    '''draws border along the turtle window'''
     border = turtle.Turtle()
     border.speed(0)
     border.penup()
@@ -92,7 +94,7 @@ def draw_border(l, b):
 
 
 def draw_sq(pos, color='white', win_length=win_x, win_breadth=win_y):
-    # (x, y) correspond to the top left corners for the rectangle
+    '''(x, y) correspond to the top left corners for the rectangle'''
 
     x, y, length, breadth = pos
 
@@ -114,6 +116,7 @@ def draw_sq(pos, color='white', win_length=win_x, win_breadth=win_y):
 
 
 def draw_fan(pos):
+    '''draws fan on the turtle window'''
 
     x, y, r = pos
     y -= r
@@ -131,6 +134,7 @@ def draw_fan(pos):
 
 
 def draw_tv(pos, image=gif_dir+'0.gif'):
+    '''draws a tv with images in it'''
 
     x, y = pos
     larger = PhotoImage(file=image).subsample(2, 2)
@@ -144,6 +148,7 @@ def draw_tv(pos, image=gif_dir+'0.gif'):
 
 
 def turn_fan():
+    '''simulates a turning fan'''
     x, y, r = fan
     y -= r
     global fan_state
@@ -172,6 +177,7 @@ def turn_fan():
 
 
 def fill_floor():
+    '''cleans the floor area on the simulation'''
     global floor_filling
 
     if floor_filling is False:
@@ -206,7 +212,7 @@ def fill_floor():
     return
 
 
-# triggering functions
+# triggering functions for actuations
 
 def red_on():
     global red_state
@@ -381,7 +387,7 @@ class MySubscribeCallback(SubscribeCallback):
     def message(self, pubnub, event):
         global count
         global msg_list
-        print(f"Count = {count}")
+        # print(f"Count = {count}")
 
         print("[MESSAGE received]")
 
@@ -389,16 +395,8 @@ class MySubscribeCallback(SubscribeCallback):
             print("The publisher has ended the session.")
             os._exit(0)
         else:
-            # print("{}: {}".format(
-            #     event.message["entry"], event.message["update"]))
-
             recvd_msg = str(event.message["update"])
             print(f"Message = {recvd_msg}")
-
-        #     if recvd_msg in func_map.keys():
-        #         func_map[recvd_msg]()
-
-        # count += 1
 
             msg_list.append(recvd_msg)
             print(msg_list)
@@ -414,7 +412,7 @@ class MySubscribeCallback(SubscribeCallback):
 
 
 def setup():
-    # text and other setup
+    # text and other setup for simulation
 
     # red led
     turtle.speed(0)
@@ -492,6 +490,7 @@ def setup():
     turtle.write('Floor', font=('Verdana', 10, 'normal'))
 
 
+# main
 draw_border(win_x, win_y)
 draw_sq(red, color='white')
 draw_sq(green, color='white')

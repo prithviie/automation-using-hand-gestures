@@ -2,13 +2,9 @@ import os
 import shutil
 from PIL import Image
 
-# RESIZES ALL IMAGES FROM SUB-DIRECTORIES
+# resizes all dataset images
 
 dataset_dir = 'Dataset'
-# all_data_dir = "All_data"
-
-# if not os.path.isdir(f"{dataset_dir}/{all_data_dir}"):
-#     os.mkdir(f"{dataset_dir}/{all_data_dir}")
 
 
 def resizeImage(imageName):
@@ -28,5 +24,3 @@ for dir in os.listdir(dataset_dir):
 for loc in gestures_dirs:
     for image in os.listdir(loc):
         resizeImage(f"{loc}/{image}")
-
-        # shutil.move(f"{loc}/{image}", f"{dataset_dir}/{all_data_dir}/")

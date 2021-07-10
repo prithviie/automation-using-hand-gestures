@@ -11,7 +11,7 @@ import imutils
 import os
 from sklearn.preprocessing import LabelEncoder
 from PalmTracker import *
-
+# PUBLISHER SIDE
 
 # PUBNUB
 from pubnub.callbacks import SubscribeCallback
@@ -52,7 +52,6 @@ def resizeImage(imageName):
 
 
 def getPredictedClass():
-    # Predict
     image = cv2.imread('Temp.png')
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     prediction = model.predict([gray_image.reshape(89, 100, 1)])
