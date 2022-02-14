@@ -1,12 +1,12 @@
 # Automation using Hand Gestures
 
-This project involves recognizing real time gestures and automating simple real life tasks such as turning on/off appliances, interacting with a television and other electronic items. This project implements **Home Automation using a Convolution Neural Network** based gesture classifier. These gestures are used as an actuation mechanism for actuating various household items. The input image is fed into the network after thresholding and **background elimination**, background elimination is done using the concept of running average. The CNN model is **7** hidden layer architecture and it is trained on a custom dataset consisting of 12 gestures with a total of 1000 images for each gesture. The automation is **simulated using a GUI**. Some parts (lights in the house) of the actuation are also demonstrated using an **Arduino** (Hardware actuation). The recognized gesture is transmitted to another device and the corresponding actuation occurs on the receiver's side. The gesture classification is transmitted across devices via the internet using the [Pubnub](https://www.pubnub.com/) API. Refer [this](https://www.pubnub.com/blog/socket-programming-in-python-client-server-p2p/) article to get started with using the Pubnub API.
+This project involves recognizing real time gestures and automating simple real life tasks such as turning on/off appliances, interacting with a television and other electronic items. This project implements **Home Automation using a Convolution Neural Network** based gesture classifier. These gestures are used as an actuation mechanism for actuating various household items. CLick [here](#output) to see the output.<br>
 
 ## About the Project
 
 - The project involves recognizing real time gestures and automating simple real life tasks. There are **12** gestures that are recognized.
 - The different gestures include - _Direction_left_, _Direction_right_, _Fist_, _Five-palm_, _OK_, _Stop_, _Thumbs_up_, _Thumbs_down_, _One_, _Two_ _Three_, _Four_ and _Five_, see [Dataset](Dataset).
-- The dataset used is a custom dataset. This dataset consists of 12,000 images for 12 of the gestures mentioned above. Each gesture has 1000 images corresponding to the right hand. Each image is resized to a dimension of 89x100.
+- The dataset used is a custom dataset. It consists of 12,000 images for 12 of the gestures mentioned above. Each gesture has 1000 images corresponding to the right hand. Each image is resized to a dimension of 89x100.
 
 ## Requirements
 
@@ -49,9 +49,11 @@ Files:
 
 - [`ModelTrainer.ipynb`](ModelTrainer.ipynb) to train the CNN.
 
+Refer the [how to](#howto) section to get started.
+
 ## Some key insights
 
-### Background Elimination algorithm
+### Background Elimination Algorithm
 
 The Background elimination algorithm uses the concept of **running average**. Here it is used to detect a hand and isolate it from the background. The algorithm analyses the first 30 frames of the video feed where it analyses the 'still' background. After the first 30 frames, if an object enters the region, that object is considered as _"not the background"_ and hence it is detected as the _object_ in the region. This way when a hand is brought in the region, it is properly detected.
 
@@ -62,7 +64,15 @@ The network consists **1** fully-connected layer with **sigmoid** as the activat
 The network is trained over **10** epochs with a batch size of **50** and a learning rate of **0.001**. The optimizer used is **Adam**.<br>
 The obtained accuracy for the validation set is **99.87%**.
 
-## Procedure for creating a custom dataset
+### Real-Time Detection
+
+The input image is fed into the network after thresholding and **background elimination**, background elimination is done using the concept of running average. The CNN model is **7** hidden layer architecture and it is trained on a custom dataset consisting of 12 gestures with a total of 1000 images for each gesture. The automation is **simulated using a GUI**. Some parts (lights in the house) of the actuation are also demonstrated using an **Arduino** (Hardware actuation). <br>
+
+The recognized gesture is transmitted to another device and the corresponding actuation occurs on the receiver's side. The gesture classification is transmitted across devices via the internet using the [Pubnub](https://www.pubnub.com/) API. Refer [this](https://www.pubnub.com/blog/socket-programming-in-python-client-server-p2p/) article to get started with using the Pubnub API.
+
+<h2 id="howto"> HOW TO </h2>
+
+### Procedure for creating a custom dataset
 
 _Note: All the files are to be executed from the root of the project directory only._
 
@@ -86,7 +96,7 @@ _Note: All the files are to be executed from the root of the project directory o
 
 - run [preprocessing/create_final_dataset.py](preprocessing/create_final_dataset.py): run only after creating the entire dataset. Resizes all dataset images to appropriate size of 89x100.
 
-## How to run the Real time prediction
+### How to run the Real time prediction
 
 Run [`ContinuousGesturePredictor.py`](ContinuousGesturePredictor.py) and wait for a window with the video feed to open up. Once the window opens, wait for the background elimination algorithm to register the background before performing any gestures (you can see numbers 0 to 29 being printed over the console). Once that is done, you can start performing the gestures as required. Once you start performing the gestures, another window named _"Thresholded"_ opens up. To start recognizing the gestures, press '**s**' on your keyboard ('**q**' to quit). Another window named _"Statistics"_ will open up and print the results. This same file will also transmit the recognised gesture over the internet using the Pubnub API. This file acts as the _publisher_ when transmitting the gesture.<br>
 
@@ -108,7 +118,7 @@ Run [`Actuator.py`](Actuator.py) on the same or another computer (connect the Ar
 | OK              | Predict rain       |
 | Direction right | T.V channel change |
 
-## Output
+<h2 id="output"> Output </h2>
 
 :octocat: Here is the final output:
-![](Result.gif)
+![output](Result.gif)
