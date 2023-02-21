@@ -1,6 +1,6 @@
 # Automation using Hand Gestures
 
-This project involves recognizing real time gestures and automating simple real life tasks such as turning on/off appliances, interacting with a television and other electronic items. This project implements **Home Automation using a Convolution Neural Network** based gesture classifier. These gestures are used as an actuation mechanism for actuating various household items. CLick [here](#output) to see the output.<br>
+This project involves recognizing real time gestures and automating simple real life tasks such as turning on/off appliances, interacting with a television and other electronic items. This project implements **Home Automation with hand gestures using Background Elimination and Convolution Neural Network based classifier**. These gestures are used as an actuation mechanism for actuating various household items. Click [here](#output) to see the output.<br>
 
 ## About the Project
 
