@@ -122,3 +122,7 @@ Run [`Actuator.py`](Actuator.py) on the same or another computer (connect the Ar
 
 :octocat: Here is the final output:
 ![output](Result.gif)
+
+## Other links
+
+Click [here](https://prtvi.github.io/allprojects.html) to check out my other projects
